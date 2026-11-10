@@ -1,0 +1,438 @@
+{
+  "name": "azp-local",
+  "displayName": "Azure Pipelines Local Runner",
+  "description": "Draw any azure-pipelines.yml as the Azure DevOps portal does, and run its jobs in Docker containers on your machine.",
+  "version": "0.1.0",
+  "publisher": "azp-local",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Testing",
+    "Other"
+  ],
+  "keywords": [
+    "azure pipelines",
+    "azure devops",
+    "ci",
+    "docker",
+    "pipeline"
+  ],
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "The graph and the expanded YAML are available. Running a pipeline executes code from the repository and needs a trusted workspace."
+    },
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "Graph and expansion only."
+    }
+  },
+  "activationEvents": [
+    "workspaceContains:**/azure-pipelines*.y*ml",
+    "workspaceContains:.azp-local.yml",
+    "onLanguage:azure-pipelines",
+    "onLanguage:yaml"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "azpLocal",
+          "title": "Pipelines (local)",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "azpLocal": [
+        {
+          "id": "azpLocal.pipelines",
+          "name": "Pipelines"
+        },
+        {
+          "id": "azpLocal.history",
+          "name": "Runs"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "azpLocal.pipelines",
+        "contents": "No Azure Pipelines file was found in this workspace.\nA YAML file counts when it has top-level stages, jobs, steps or extends, whatever it is called. Files can also be listed under pipelines: in .azp-local.yml.\n[Refresh](command:azpLocal.refresh)"
+      },
+      {
+        "view": "azpLocal.history",
+        "contents": "No local runs yet.\n[Run a pipeline](command:azpLocal.run)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "azpLocal.showGraph",
+        "title": "Show pipeline graph",
+        "category": "Pipelines (local)",
+        "icon": "$(type-hierarchy-sub)"
+      },
+      {
+        "command": "azpLocal.expand",
+        "title": "Expand to final YAML",
+        "category": "Pipelines (local)",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "azpLocal.run",
+        "title": "Run pipeline",
+        "category": "Pipelines (local)",
+        "icon": "$(play)"
+      },
+      {
+        "command": "azpLocal.runStage",
+        "title": "Run stage",
+        "category": "Pipelines (local)",
+        "icon": "$(play)"
+      },
+      {
+        "command": "azpLocal.runFromStage",
+        "title": "Run from this stage",
+        "category": "Pipelines (local)",
+        "icon": "$(run-below)"
+      },
+      {
+        "command": "azpLocal.runJob",
+        "title": "Run job",
+        "category": "Pipelines (local)",
+        "icon": "$(play)"
+      },
+      {
+        "command": "azpLocal.runStep",
+        "title": "Run step and those before it",
+        "category": "Pipelines (local)",
+        "icon": "$(run-above)"
+      },
+      {
+        "command": "azpLocal.rerunFailed",
+        "title": "Re-run failed jobs",
+        "category": "Pipelines (local)",
+        "icon": "$(debug-rerun)"
+      },
+      {
+        "command": "azpLocal.cancel",
+        "title": "Cancel run",
+        "category": "Pipelines (local)",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "azpLocal.openShell",
+        "title": "Open a shell in the job container",
+        "category": "Pipelines (local)",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "azpLocal.setInputs",
+        "title": "Set parameters and variables for this run",
+        "category": "Pipelines (local)",
+        "icon": "$(settings)"
+      },
+      {
+        "command": "azpLocal.manageSecrets",
+        "title": "Manage secrets",
+        "category": "Pipelines (local)",
+        "icon": "$(key)"
+      },
+      {
+        "command": "azpLocal.doctor",
+        "title": "Doctor",
+        "category": "Pipelines (local)",
+        "icon": "$(pulse)"
+      },
+      {
+        "command": "azpLocal.refresh",
+        "title": "Refresh",
+        "category": "Pipelines (local)",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "azpLocal.openLog",
+        "title": "Open step log",
+        "category": "Pipelines (local)",
+        "icon": "$(output)"
+      },
+      {
+        "command": "azpLocal.goToSource",
+        "title": "Go to YAML",
+        "category": "Pipelines (local)",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "azpLocal.openRun",
+        "title": "Open run",
+        "category": "Pipelines (local)",
+        "icon": "$(history)"
+      },
+      {
+        "command": "azpLocal.deleteRun",
+        "title": "Delete run",
+        "category": "Pipelines (local)",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "azpLocal.clearRuns",
+        "title": "Delete all runs",
+        "category": "Pipelines (local)",
+        "icon": "$(clear-all)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "azpLocal.cancel",
+          "when": "view == azpLocal.pipelines && azpLocal.running",
+          "group": "navigation@0"
+        },
+        {
+          "command": "azpLocal.doctor",
+          "when": "view == azpLocal.pipelines",
+          "group": "navigation@1"
+        },
+        {
+          "command": "azpLocal.refresh",
+          "when": "view == azpLocal.pipelines",
+          "group": "navigation@2"
+        },
+        {
+          "command": "azpLocal.manageSecrets",
+          "when": "view == azpLocal.pipelines",
+          "group": "inputs@1"
+        },
+        {
+          "command": "azpLocal.rerunFailed",
+          "when": "view == azpLocal.history",
+          "group": "navigation@1"
+        },
+        {
+          "command": "azpLocal.clearRuns",
+          "when": "view == azpLocal.history",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "azpLocal.run",
+          "when": "view == azpLocal.pipelines && viewItem == pipeline",
+          "group": "inline@1"
+        },
+        {
+          "command": "azpLocal.showGraph",
+          "when": "view == azpLocal.pipelines && viewItem == pipeline",
+          "group": "inline@2"
+        },
+        {
+          "command": "azpLocal.expand",
+          "when": "view == azpLocal.pipelines && viewItem == pipeline",
+          "group": "1_view@1"
+        },
+        {
+          "command": "azpLocal.setInputs",
+          "when": "view == azpLocal.pipelines && viewItem == pipeline",
+          "group": "2_inputs@1"
+        },
+        {
+          "command": "azpLocal.rerunFailed",
+          "when": "view == azpLocal.pipelines && viewItem == pipeline",
+          "group": "3_run@1"
+        },
+        {
+          "command": "azpLocal.runStage",
+          "when": "view == azpLocal.pipelines && viewItem == stage",
+          "group": "inline@1"
+        },
+        {
+          "command": "azpLocal.runFromStage",
+          "when": "view == azpLocal.pipelines && viewItem == stage",
+          "group": "3_run@1"
+        },
+        {
+          "command": "azpLocal.runJob",
+          "when": "view == azpLocal.pipelines && viewItem =~ /^job/",
+          "group": "inline@1"
+        },
+        {
+          "command": "azpLocal.openShell",
+          "when": "view == azpLocal.pipelines && viewItem == jobKept",
+          "group": "inline@2"
+        },
+        {
+          "command": "azpLocal.runStep",
+          "when": "view == azpLocal.pipelines && viewItem =~ /^step/",
+          "group": "inline@1"
+        },
+        {
+          "command": "azpLocal.openLog",
+          "when": "view == azpLocal.pipelines && viewItem == stepWithLog",
+          "group": "inline@2"
+        },
+        {
+          "command": "azpLocal.goToSource",
+          "when": "view == azpLocal.pipelines && viewItem =~ /^(stage|job|step)/",
+          "group": "1_view@1"
+        },
+        {
+          "command": "azpLocal.rerunFailed",
+          "when": "view == azpLocal.history && viewItem == run",
+          "group": "inline@1"
+        },
+        {
+          "command": "azpLocal.deleteRun",
+          "when": "view == azpLocal.history && viewItem == run",
+          "group": "9_delete@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "azpLocal.showGraph",
+          "when": "azpLocal.isPipelineEditor",
+          "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "azpLocal.runStage",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.runFromStage",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.runJob",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.runStep",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.openLog",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.goToSource",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.openRun",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.deleteRun",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.openShell",
+          "when": "false"
+        },
+        {
+          "command": "azpLocal.cancel",
+          "when": "azpLocal.running"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Pipelines (local)",
+      "properties": {
+        "azpLocal.engine": {
+          "type": "string",
+          "enum": [
+            "local"
+          ],
+          "enumDescriptions": [
+            "Run jobs in containers on this machine. Works offline and with no account."
+          ],
+          "default": "local",
+          "description": "Which engine runs a pipeline. This build has the local engine only."
+        },
+        "azpLocal.maxParallelJobs": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "description": "How many jobs run at the same time."
+        },
+        "azpLocal.keepContainersOnFailure": {
+          "type": "boolean",
+          "default": false,
+          "description": "Keep the container of a failed job so that a shell can be opened in it."
+        },
+        "azpLocal.matchHostedHardware": {
+          "type": "boolean",
+          "default": false,
+          "description": "Limit job containers to 2 CPUs and 7 GB of memory, as Microsoft-hosted agents have."
+        },
+        "azpLocal.dockerHost": {
+          "type": "string",
+          "default": "",
+          "description": "Address of the Docker daemon (npipe://, unix:// or tcp://). Empty finds Docker Desktop, Rancher Desktop or Podman by itself."
+        },
+        "azpLocal.codeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Run and Show in graph above stages and jobs in pipeline files."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "azp-log",
+        "aliases": [
+          "Pipeline step log"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "azp-log",
+        "scopeName": "text.azp-log",
+        "path": "./syntaxes/azp-log.tmLanguage.json"
+      }
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": ".azp-local.yml",
+        "url": "./schemas/azp-local.schema.json"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "azp-local",
+        "required": [],
+        "properties": {
+          "pipeline": {
+            "type": "string",
+            "description": "Pipeline file, relative to the workspace folder. Not needed when the workspace has only one."
+          },
+          "stage": {
+            "type": "string",
+            "description": "Run only this stage."
+          },
+          "job": {
+            "type": "string",
+            "description": "Run only this job. Use job.leg for one matrix leg."
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "package": "vsce package --no-dependencies --allow-missing-repository --skip-license"
+  },
+  "devDependencies": {
+    "@types/vscode": "~1.96.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0"
+  }
+}

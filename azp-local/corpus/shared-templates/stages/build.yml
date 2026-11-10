@@ -1,0 +1,36 @@
+parameters:
+  - name: solution
+    type: string
+  - name: configuration
+    type: string
+    default: Release
+  - name: runTests
+    type: boolean
+    default: true
+
+stages:
+  - stage: Build
+    displayName: Build (${{ parameters.configuration }})
+    jobs:
+      - job: build
+        pool:
+          vmImage: ubuntu-24.04
+        steps:
+          - template: /steps/dotnet.yml
+            parameters:
+              command: build
+              arguments: ${{ parameters.solution }} --configuration ${{ parameters.configuration }}
+          - ${{ if parameters.runTests }}:
+              - template: ../steps/dotnet.yml
+                parameters:
+                  command: test
+                  arguments: ${{ parameters.solution }} --no-build --logger trx
+              - task: PublishTestResults@2
+                condition: succeededOrFailed()
+                inputs:
+                  testResultsFormat: VSTest
+                  testResultsFiles: '**/*.trx'
+          - ${{ else }}:
+              - script: echo "Tests are skipped for scheduled builds"
+          - publish: $(Build.ArtifactStagingDirectory)
+            artifact: orders

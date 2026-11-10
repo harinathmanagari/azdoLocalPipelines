@@ -1,0 +1,44 @@
+# The template every pipeline in the organisation must extend: it owns the job
+# shape and lets the pipeline supply only its build steps.
+parameters:
+  - name: image
+    type: string
+  - name: level
+    type: string
+    default: ''
+  - name: buildSteps
+    type: stepList
+    default: []
+  - name: extraVariables
+    type: object
+    default:
+      CGO_ENABLED: '0'
+
+variables:
+  ${{ insert }}: ${{ parameters.extraVariables }}
+  governed: 'true'
+
+jobs:
+  - job: build
+    displayName: Build in ${{ parameters.image }}
+    pool:
+      vmImage: ubuntu-24.04
+    container: ${{ parameters.image }}
+    variables:
+      ${{ if startsWith(parameters.level, '1.24') }}:
+        support: current
+      ${{ elseif startsWith(parameters.level, '1.23') }}:
+        support: previous
+      ${{ else }}:
+        support: unsupported
+    steps:
+      - checkout: self
+        fetchDepth: 1
+      - script: echo "Support level $(support), ${{ length(parameters.buildSteps) }} build steps"
+        displayName: Report
+      - ${{ parameters.buildSteps }}
+      - ${{ each step in parameters.buildSteps }}:
+          - ${{ if contains(step.displayName, 'Test') }}:
+              - script: echo "ran ${{ step.displayName }}"
+                displayName: After ${{ lower(step.displayName) }}
+                condition: always()

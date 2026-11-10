@@ -1,0 +1,97 @@
+trigger:
+  - main
+  - release/*
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Platform/pipeline-templates
+      ref: refs/tags/v3
+variables:
+  - name: DOTNET_NOLOGO
+    value: "true"
+  - name: buildPlatform
+    value: Any CPU
+  - name: solution
+    value: src/Orders.sln
+stages:
+  - stage: Build
+    displayName: Build (Release)
+    jobs:
+      - job: build
+        pool:
+          vmImage: ubuntu-24.04
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: dotnet build
+            inputs:
+              command: build
+              arguments: $(solution) --configuration Release
+          - task: DotNetCoreCLI@2
+            displayName: dotnet test
+            inputs:
+              command: test
+              arguments: $(solution) --no-build --logger trx
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: "**/*.trx"
+          - publish: $(Build.ArtifactStagingDirectory)
+            artifact: orders
+  - stage: Deploy_test
+    displayName: Deploy to TEST
+    dependsOn:
+      - Build
+    jobs:
+      - deployment: deploy
+        displayName: Deploy test
+        environment: orders-test
+        pool:
+          name: OnPremLinux
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: orders
+                - task: AzureWebApp@1
+                  displayName: Deploy web app
+                  inputs:
+                    azureSubscription: orders-test
+                    appName: orders-test
+                    package: $(Pipeline.Workspace)/orders/*.zip
+            on:
+              failure:
+                steps:
+                  - script: echo "Deployment to test failed"
+                    displayName: Notify
+  - stage: Deploy_prod
+    displayName: Deploy to PROD
+    dependsOn:
+      - Build
+      - Deploy_test
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+    jobs:
+      - deployment: deploy
+        displayName: Deploy prod
+        environment: orders-prod
+        pool:
+          name: OnPremLinux
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: orders
+                - task: AzureWebApp@1
+                  displayName: Deploy web app
+                  inputs:
+                    azureSubscription: orders-prod
+                    appName: orders-prod
+                    package: $(Pipeline.Workspace)/orders/*.zip
+            on:
+              failure:
+                steps:
+                  - script: echo "Deployment to prod failed"
+                    displayName: Notify

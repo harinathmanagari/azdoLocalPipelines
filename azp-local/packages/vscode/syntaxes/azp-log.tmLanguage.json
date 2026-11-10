@@ -1,0 +1,17 @@
+{
+  "name": "Pipeline step log",
+  "scopeName": "text.azp-log",
+  "patterns": [
+    {
+      "match": "^(\\d{4}-\\d{2}-\\d{2}T[\\d:.]+Z) ",
+      "captures": { "1": { "name": "comment.line.timestamp.azp-log" } }
+    },
+    { "match": "##\\[error\\].*$", "name": "invalid.illegal.error.azp-log" },
+    { "match": "##\\[warning\\].*$", "name": "markup.changed.warning.azp-log" },
+    { "match": "##\\[(section|group)\\].*$", "name": "markup.heading.section.azp-log" },
+    { "match": "##\\[endgroup\\].*$", "name": "comment.line.endgroup.azp-log" },
+    { "match": "##\\[(command|debug)\\].*$", "name": "keyword.other.command.azp-log" },
+    { "match": "##vso\\[[^\\]]*\\]", "name": "meta.preprocessor.logging-command.azp-log" },
+    { "match": "={10,}.*={10,}", "name": "comment.line.separator.azp-log" }
+  ]
+}

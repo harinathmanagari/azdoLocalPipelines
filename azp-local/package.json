@@ -1,0 +1,26 @@
+{
+  "name": "azp-local-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Azure Pipelines Local Runner: core library, local Docker engine, CLI and VS Code extension.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p packages/vscode/tsconfig.webview.json --noEmit",
+    "test": "vitest run",
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "package": "npm run build && npm run package -w azp-local",
+    "test:extension": "npm run build && node packages/vscode/test/run.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/picomatch": "^4.0.3",
+    "@types/tar-stream": "^3.1.5",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}

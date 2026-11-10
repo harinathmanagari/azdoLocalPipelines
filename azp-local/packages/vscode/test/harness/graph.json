@@ -1,0 +1,982 @@
+{
+  "name": "$(Date:yyyyMMdd)$(Rev:.r)",
+  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+  "triggers": {
+    "ci": "branches main; not paths README.md",
+    "pr": "branches main",
+    "schedules": [
+      {
+        "cron": "0 3 * * 1-5",
+        "displayName": "Nightly build"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "Validate",
+      "displayName": "Validate",
+      "implicit": false,
+      "column": 0,
+      "dependsOn": [],
+      "src": {
+        "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+        "line": 49,
+        "column": 5
+      },
+      "jobs": [
+        {
+          "id": "Validate.lint",
+          "name": "lint",
+          "displayName": "Lint and typecheck",
+          "kind": "job",
+          "dependsOn": [],
+          "pool": "ubuntu-24.04",
+          "target": {
+            "kind": "container",
+            "image": "azp-local/agent-ubuntu:24.04",
+            "builtIn": "24.04",
+            "source": "default"
+          },
+          "targetLabel": "azp-local/agent-ubuntu:24.04",
+          "services": [],
+          "tiers": {
+            "1": 6,
+            "2": 0,
+            "3": 0
+          },
+          "steps": [
+            {
+              "id": "checkout",
+              "displayName": "Checkout",
+              "kind": "checkout",
+              "tier": 1,
+              "enabled": true,
+              "implicit": true,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 57,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step1",
+              "displayName": "Use Node 22.x",
+              "kind": "UseNode@1",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 57,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step2",
+              "displayName": "Cache npm",
+              "kind": "Cache@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 12,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 57,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step3",
+              "displayName": "Install dependencies",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 19,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 57,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step4",
+              "displayName": "ESLint",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 60,
+                "column": 13
+              }
+            },
+            {
+              "id": "step5",
+              "displayName": "Extra check: typecheck",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 63,
+                "column": 17
+              }
+            }
+          ],
+          "src": {
+            "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+            "line": 52,
+            "column": 9
+          }
+        },
+        {
+          "id": "Validate.test.linux_node22",
+          "name": "test",
+          "displayName": "Unit tests linux_node22",
+          "kind": "job",
+          "leg": "linux_node22",
+          "dependsOn": [],
+          "pool": "ubuntu-24.04",
+          "target": {
+            "kind": "container",
+            "image": "azp-local/agent-ubuntu:24.04",
+            "builtIn": "24.04",
+            "source": "default"
+          },
+          "targetLabel": "azp-local/agent-ubuntu:24.04",
+          "services": [],
+          "tiers": {
+            "1": 8,
+            "2": 0,
+            "3": 0
+          },
+          "steps": [
+            {
+              "id": "checkout",
+              "displayName": "Checkout",
+              "kind": "checkout",
+              "tier": 1,
+              "enabled": true,
+              "implicit": true,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step1",
+              "displayName": "Use Node 22.x",
+              "kind": "UseNode@1",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step2",
+              "displayName": "Cache npm",
+              "kind": "Cache@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 12,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step3",
+              "displayName": "Install dependencies",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 19,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step4",
+              "displayName": "Run unit tests",
+              "kind": "script",
+              "tier": 1,
+              "condition": "and(succeeded(), ne(variables['coverage'], 'true'))",
+              "preview": "skipped",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 90,
+                "column": 13
+              }
+            },
+            {
+              "id": "step5",
+              "displayName": "Run unit tests with coverage",
+              "kind": "script",
+              "tier": 1,
+              "condition": "and(succeeded(), eq(variables['coverage'], 'true'))",
+              "preview": "runs",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 93,
+                "column": 13
+              }
+            },
+            {
+              "id": "step6",
+              "displayName": "Publish test results",
+              "kind": "PublishTestResults@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "condition": "succeededOrFailed()",
+              "preview": "runs",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 96,
+                "column": 13
+              }
+            },
+            {
+              "id": "step7",
+              "displayName": "Publish coverage",
+              "kind": "PublishCodeCoverageResults@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "condition": "and(succeeded(), eq(variables['coverage'], 'true'))",
+              "preview": "runs",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 104,
+                "column": 13
+              }
+            }
+          ],
+          "src": {
+            "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+            "line": 66,
+            "column": 9
+          }
+        },
+        {
+          "id": "Validate.test.linux_node24",
+          "name": "test",
+          "displayName": "Unit tests linux_node24",
+          "kind": "job",
+          "leg": "linux_node24",
+          "dependsOn": [],
+          "pool": "ubuntu-24.04",
+          "target": {
+            "kind": "container",
+            "image": "azp-local/agent-ubuntu:24.04",
+            "builtIn": "24.04",
+            "source": "default"
+          },
+          "targetLabel": "azp-local/agent-ubuntu:24.04",
+          "services": [],
+          "tiers": {
+            "1": 8,
+            "2": 0,
+            "3": 0
+          },
+          "steps": [
+            {
+              "id": "checkout",
+              "displayName": "Checkout",
+              "kind": "checkout",
+              "tier": 1,
+              "enabled": true,
+              "implicit": true,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step1",
+              "displayName": "Use Node 24.x",
+              "kind": "UseNode@1",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step2",
+              "displayName": "Cache npm",
+              "kind": "Cache@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 12,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step3",
+              "displayName": "Install dependencies",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 19,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step4",
+              "displayName": "Run unit tests",
+              "kind": "script",
+              "tier": 1,
+              "condition": "and(succeeded(), ne(variables['coverage'], 'true'))",
+              "preview": "runs",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 90,
+                "column": 13
+              }
+            },
+            {
+              "id": "step5",
+              "displayName": "Run unit tests with coverage",
+              "kind": "script",
+              "tier": 1,
+              "condition": "and(succeeded(), eq(variables['coverage'], 'true'))",
+              "preview": "skipped",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 93,
+                "column": 13
+              }
+            },
+            {
+              "id": "step6",
+              "displayName": "Publish test results",
+              "kind": "PublishTestResults@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "condition": "succeededOrFailed()",
+              "preview": "runs",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 96,
+                "column": 13
+              }
+            },
+            {
+              "id": "step7",
+              "displayName": "Publish coverage",
+              "kind": "PublishCodeCoverageResults@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "condition": "and(succeeded(), eq(variables['coverage'], 'true'))",
+              "preview": "skipped",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 104,
+                "column": 13
+              }
+            }
+          ],
+          "src": {
+            "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+            "line": 66,
+            "column": 9
+          }
+        },
+        {
+          "id": "Validate.test.windows_node22",
+          "name": "test",
+          "displayName": "Unit tests windows_node22",
+          "kind": "job",
+          "leg": "windows_node22",
+          "dependsOn": [],
+          "pool": "windows-2025",
+          "target": {
+            "kind": "host",
+            "note": "Runs directly on this machine in a scratch folder. Not isolated."
+          },
+          "targetLabel": "host (not isolated)",
+          "services": [],
+          "tiers": {
+            "1": 8,
+            "2": 0,
+            "3": 0
+          },
+          "steps": [
+            {
+              "id": "checkout",
+              "displayName": "Checkout",
+              "kind": "checkout",
+              "tier": 1,
+              "enabled": true,
+              "implicit": true,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step1",
+              "displayName": "Use Node 22.x",
+              "kind": "UseNode@1",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step2",
+              "displayName": "Cache npm",
+              "kind": "Cache@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 12,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step3",
+              "displayName": "Install dependencies",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 19,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 87,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step4",
+              "displayName": "Run unit tests",
+              "kind": "script",
+              "tier": 1,
+              "condition": "and(succeeded(), ne(variables['coverage'], 'true'))",
+              "preview": "runs",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 90,
+                "column": 13
+              }
+            },
+            {
+              "id": "step5",
+              "displayName": "Run unit tests with coverage",
+              "kind": "script",
+              "tier": 1,
+              "condition": "and(succeeded(), eq(variables['coverage'], 'true'))",
+              "preview": "skipped",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 93,
+                "column": 13
+              }
+            },
+            {
+              "id": "step6",
+              "displayName": "Publish test results",
+              "kind": "PublishTestResults@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "condition": "succeededOrFailed()",
+              "preview": "runs",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 96,
+                "column": 13
+              }
+            },
+            {
+              "id": "step7",
+              "displayName": "Publish coverage",
+              "kind": "PublishCodeCoverageResults@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "condition": "and(succeeded(), eq(variables['coverage'], 'true'))",
+              "preview": "skipped",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 104,
+                "column": 13
+              }
+            }
+          ],
+          "src": {
+            "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+            "line": 66,
+            "column": 9
+          }
+        }
+      ]
+    },
+    {
+      "id": "Build",
+      "displayName": "Build",
+      "implicit": false,
+      "column": 1,
+      "dependsOn": [
+        "Validate"
+      ],
+      "src": {
+        "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+        "line": 110,
+        "column": 5
+      },
+      "jobs": [
+        {
+          "id": "Build.build",
+          "name": "build",
+          "displayName": "Production build",
+          "kind": "job",
+          "dependsOn": [],
+          "pool": "ubuntu-24.04",
+          "target": {
+            "kind": "container",
+            "image": "azp-local/agent-ubuntu:24.04",
+            "builtIn": "24.04",
+            "source": "default"
+          },
+          "targetLabel": "azp-local/agent-ubuntu:24.04",
+          "services": [],
+          "tiers": {
+            "1": 7,
+            "2": 1,
+            "3": 0
+          },
+          "steps": [
+            {
+              "id": "checkout",
+              "displayName": "Checkout",
+              "kind": "checkout",
+              "tier": 1,
+              "enabled": true,
+              "implicit": true,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 119,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step1",
+              "displayName": "Use Node 22.x",
+              "kind": "UseNode@1",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 8,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 119,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step2",
+              "displayName": "Cache npm",
+              "kind": "Cache@2",
+              "tier": 1,
+              "tierNote": "Built into the local engine.",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 12,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 119,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "step3",
+              "displayName": "Install dependencies",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\ci\\templates\\install.yml",
+                "line": 19,
+                "column": 5,
+                "via": {
+                  "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                  "line": 119,
+                  "column": 13
+                }
+              }
+            },
+            {
+              "id": "meta",
+              "displayName": "Compute version",
+              "kind": "bash",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 122,
+                "column": 13
+              }
+            },
+            {
+              "id": "step5",
+              "displayName": "Vite build",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 129,
+                "column": 13
+              }
+            },
+            {
+              "id": "step6",
+              "displayName": "Bundle size report",
+              "kind": "BundleSizeReport@1",
+              "tier": 2,
+              "tierNote": "Runs the task's own Node handler from its package.",
+              "override": "task code from ./ci/tasks/BundleSizeReport",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 133,
+                "column": 13
+              }
+            },
+            {
+              "id": "step7",
+              "displayName": "Publish web artifact",
+              "kind": "publish",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 138,
+                "column": 13
+              }
+            }
+          ],
+          "src": {
+            "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+            "line": 114,
+            "column": 9
+          }
+        },
+        {
+          "id": "Build.release_notes",
+          "name": "release_notes",
+          "displayName": "Release notes",
+          "kind": "job",
+          "dependsOn": [
+            "Build.build"
+          ],
+          "pool": "ubuntu-24.04",
+          "target": {
+            "kind": "container",
+            "image": "azp-local/agent-ubuntu:24.04",
+            "builtIn": "24.04",
+            "source": "default"
+          },
+          "targetLabel": "azp-local/agent-ubuntu:24.04",
+          "services": [],
+          "tiers": {
+            "1": 3,
+            "2": 0,
+            "3": 0
+          },
+          "steps": [
+            {
+              "id": "step1",
+              "displayName": "Checkout none",
+              "kind": "checkout",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 150,
+                "column": 13
+              }
+            },
+            {
+              "id": "step2",
+              "displayName": "Download web artifact",
+              "kind": "download",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 151,
+                "column": 13
+              }
+            },
+            {
+              "id": "step3",
+              "displayName": "Write release notes",
+              "kind": "bash",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 154,
+                "column": 13
+              }
+            }
+          ],
+          "src": {
+            "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+            "line": 142,
+            "column": 9
+          }
+        }
+      ]
+    },
+    {
+      "id": "Deploy",
+      "displayName": "Deploy (staging)",
+      "implicit": false,
+      "column": 2,
+      "dependsOn": [
+        "Build"
+      ],
+      "condition": "and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))",
+      "preview": "runs",
+      "src": {
+        "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+        "line": 171,
+        "column": 5
+      },
+      "jobs": [
+        {
+          "id": "Deploy.deploy_web",
+          "name": "deploy_web",
+          "displayName": "Deploy static site",
+          "kind": "deployment",
+          "dependsOn": [],
+          "pool": "ubuntu-24.04",
+          "target": {
+            "kind": "container",
+            "image": "azp-local/agent-ubuntu:24.04",
+            "builtIn": "24.04",
+            "source": "default"
+          },
+          "targetLabel": "azp-local/agent-ubuntu:24.04",
+          "environment": "pipeline-pulse-staging",
+          "services": [],
+          "tiers": {
+            "1": 2,
+            "2": 0,
+            "3": 1
+          },
+          "steps": [
+            {
+              "id": "download",
+              "displayName": "Download artifacts",
+              "kind": "download",
+              "tier": 1,
+              "enabled": true,
+              "implicit": true,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 189,
+                "column": 19
+              }
+            },
+            {
+              "id": "step1",
+              "displayName": "Announce deployment",
+              "kind": "script",
+              "tier": 1,
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 189,
+                "column": 19
+              }
+            },
+            {
+              "id": "step2",
+              "displayName": "Upload to Azure Static Web Apps",
+              "kind": "AzureStaticWebApp@0",
+              "tier": 3,
+              "tierNote": "Needs a service connection or cloud credential (input 'azure_static_web_apps_api_token').",
+              "override": "replaced by ./ci/local/deploy-stub.sh",
+              "enabled": true,
+              "implicit": false,
+              "src": {
+                "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+                "line": 191,
+                "column": 19
+              }
+            }
+          ],
+          "src": {
+            "file": "D:\\Claude\\LocalPipelines\\demo-app\\azure-pipelines.yml",
+            "line": 176,
+            "column": 9
+          }
+        }
+      ]
+    }
+  ],
+  "errors": 0,
+  "warnings": 0
+}

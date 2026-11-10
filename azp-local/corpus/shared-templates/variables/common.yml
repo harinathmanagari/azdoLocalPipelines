@@ -1,0 +1,5 @@
+variables:
+  - name: DOTNET_NOLOGO
+    value: 'true'
+  - name: buildPlatform
+    value: Any CPU

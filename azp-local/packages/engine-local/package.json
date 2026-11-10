@@ -1,0 +1,15 @@
+{
+  "name": "@azp-local/engine-local",
+  "version": "0.1.0",
+  "description": "Local engine: one container per job, one process per step, through the Docker Engine API.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "fast-xml-parser": "^5.11.2",
+    "ignore": "^7.0.12",
+    "picomatch": "^4.0.7",
+    "tar-stream": "^3.2.2"
+  }
+}

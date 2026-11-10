@@ -1,0 +1,70 @@
+# A .NET service: stages come from templates in another repository, and the deploy
+# stages are generated with ${{ each }} over a parameter.
+trigger:
+  - main
+  - release/*
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Platform/pipeline-templates
+      ref: refs/tags/v3
+
+parameters:
+  - name: configuration
+    type: string
+    default: Release
+    values: [Debug, Release]
+  - name: environments
+    type: object
+    default:
+      - name: test
+        approval: false
+      - name: prod
+        approval: true
+
+variables:
+  - template: variables/common.yml@templates
+  - name: solution
+    value: src/Orders.sln
+
+stages:
+  - template: stages/build.yml@templates
+    parameters:
+      solution: $(solution)
+      configuration: ${{ parameters.configuration }}
+      runTests: ${{ ne(variables['Build.Reason'], 'Schedule') }}
+
+  - ${{ each env in parameters.environments }}:
+      - stage: Deploy_${{ env.name }}
+        displayName: Deploy to ${{ upper(env.name) }}
+        dependsOn:
+          - Build
+          - ${{ if eq(env.name, 'prod') }}:
+              - Deploy_test
+        ${{ if env.approval }}:
+          condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+        jobs:
+          - deployment: deploy
+            displayName: Deploy ${{ env.name }}
+            environment: orders-${{ env.name }}
+            pool:
+              name: OnPremLinux
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - download: current
+                      artifact: orders
+                    - task: AzureWebApp@1
+                      displayName: Deploy web app
+                      inputs:
+                        azureSubscription: orders-${{ env.name }}
+                        appName: orders-${{ env.name }}
+                        package: $(Pipeline.Workspace)/orders/*.zip
+                on:
+                  failure:
+                    steps:
+                      - script: echo "Deployment to ${{ env.name }} failed"
+                        displayName: Notify

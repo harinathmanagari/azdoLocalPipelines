@@ -1,0 +1,81 @@
+# A Python library: a version matrix, a database as a service container, and a file
+# name that is not azure-pipelines.yml.
+trigger: none
+pr:
+  branches:
+    include: ['*']
+
+resources:
+  containers:
+    - container: postgres
+      image: postgres:17
+      env:
+        POSTGRES_PASSWORD: example
+      ports:
+        - 5432:5432
+
+variables:
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+  isPullRequest: $[eq(variables['Build.Reason'], 'PullRequest')]
+
+jobs:
+  - job: test
+    displayName: Test
+    pool:
+      vmImage: ubuntu-latest
+    strategy:
+      maxParallel: 3
+      matrix:
+        py311:
+          python.version: '3.11'
+        py312:
+          python.version: '3.12'
+        py313:
+          python.version: '3.13'
+          experimental: 'true'
+    services:
+      db: postgres
+    continueOnError: false
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(python.version)
+      - bash: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+        displayName: Install
+      - bash: pytest --junitxml=junit/test-results.xml --cov=src --cov-report=xml
+        displayName: pytest ($(python.version))
+        env:
+          DATABASE_URL: postgresql://postgres:example@db:5432/postgres
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: junit/test-*.xml
+          testRunTitle: Python $(python.version)
+      - task: PublishCodeCoverageResults@2
+        condition: and(succeeded(), ne(variables['experimental'], 'true'))
+        inputs:
+          summaryFileLocation: coverage.xml
+
+  - job: package
+    displayName: Build wheel
+    dependsOn: test
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - bash: python -m build
+      - task: TwineAuthenticate@1
+        inputs:
+          artifactFeed: internal/python
+      - bash: twine upload -r internal dist/*
+        displayName: Upload
+        condition: and(succeeded(), eq(variables['isPullRequest'], 'False'))
+
+  - job: mac
+    displayName: macOS smoke test
+    pool:
+      vmImage: macOS-15
+    steps:
+      - bash: python -c "import sys; print(sys.version)"

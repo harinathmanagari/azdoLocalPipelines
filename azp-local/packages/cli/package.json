@@ -1,0 +1,14 @@
+{
+  "name": "@azp-local/cli",
+  "version": "0.1.0",
+  "description": "azp-local command line: graph, expand, run, doctor.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "azp-local": "./bin/azp-local.cjs"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ]
+}

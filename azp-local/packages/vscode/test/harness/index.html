@@ -1,0 +1,186 @@
+<!doctype html>
+<!--
+  Renders the graph webview outside VS Code with fixed data, for visual checks and DOM
+  assertions (design section 12). Serve the vscode package folder and open:
+    /test/harness/index.html?state=none|live|done&theme=light|dark
+  graph.json is the demo pipeline: azp-local graph --json -C ../demo-app
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Graph harness</title>
+    <style>
+      /* Stand-ins for the theme variables VS Code injects into a webview. */
+      :root {
+        --vscode-font-family: 'Segoe UI', system-ui, sans-serif;
+        --vscode-font-size: 13px;
+        --vscode-foreground: #3b3b3b;
+        --vscode-descriptionForeground: #717171;
+        --vscode-editor-background: #ffffff;
+        --vscode-sideBar-background: #f8f8f8;
+        --vscode-editorWidget-background: #f3f3f3;
+        --vscode-panel-border: #d4d4d4;
+        --vscode-list-hoverBackground: #e8e8e8;
+        --vscode-button-background: #005fb8;
+        --vscode-button-foreground: #ffffff;
+        --vscode-button-hoverBackground: #0258a8;
+        --vscode-button-secondaryBackground: #e5e5e5;
+        --vscode-button-secondaryForeground: #3b3b3b;
+        --vscode-button-secondaryHoverBackground: #d6d6d6;
+        --vscode-focusBorder: #005fb8;
+        --vscode-textLink-foreground: #005fb8;
+        --vscode-testing-iconPassed: #388a34;
+        --vscode-testing-iconFailed: #d1242f;
+        --vscode-charts-yellow: #a5740b;
+        --vscode-charts-blue: #1a85ff;
+        --vscode-charts-purple: #8250df;
+      }
+      :root[data-theme='dark'] {
+        --vscode-foreground: #cccccc;
+        --vscode-descriptionForeground: #9d9d9d;
+        --vscode-editor-background: #1f1f1f;
+        --vscode-sideBar-background: #181818;
+        --vscode-editorWidget-background: #252526;
+        --vscode-panel-border: #3c3c3c;
+        --vscode-list-hoverBackground: #2a2d2e;
+        --vscode-button-background: #0078d4;
+        --vscode-button-hoverBackground: #026ec1;
+        --vscode-button-secondaryBackground: #313131;
+        --vscode-button-secondaryForeground: #cccccc;
+        --vscode-button-secondaryHoverBackground: #3c3c3c;
+        --vscode-focusBorder: #0078d4;
+        --vscode-textLink-foreground: #4daafc;
+        --vscode-testing-iconPassed: #73c991;
+        --vscode-testing-iconFailed: #f14c4c;
+        --vscode-charts-yellow: #cca700;
+        --vscode-charts-blue: #3794ff;
+        --vscode-charts-purple: #b180d7;
+      }
+    </style>
+    <link rel="stylesheet" href="../../media/graph.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      document.documentElement.dataset.theme = params.get('theme') ?? 'light';
+      window.posted = [];
+      let saved;
+      window.acquireVsCodeApi = () => ({
+        postMessage: (message) => window.posted.push(message),
+        getState: () => saved,
+        setState: (state) => (saved = state),
+      });
+
+      const step = (id, state, extra = {}) => ({ id, state, startedAt: 1000, finishedAt: 5000, errors: 0, warnings: 0, ...extra });
+      const now = Date.now();
+      const runs = {
+        none: undefined,
+        live: {
+          runId: 'run-0007',
+          live: true,
+          selection: 'whole pipeline',
+          startedAt: now - 95000,
+          gaps: [],
+          tests: [],
+          coverage: [],
+          artifacts: [],
+          summaries: [],
+          jobs: {
+            'Validate.lint': { state: 'succeeded', reused: false, startedAt: now - 95000, finishedAt: now - 41000, steps: [step('__init', 'succeeded', { displayName: 'Initialize job' }), step('checkout', 'succeeded'), step('step1', 'succeeded'), step('step2', 'succeeded'), step('step3', 'succeeded'), step('step4', 'succeeded'), step('step5', 'succeeded')] },
+            'Validate.test.linux_node22': { state: 'running', reused: false, startedAt: now - 60000, steps: [step('__init', 'succeeded', { displayName: 'Initialize job' }), step('checkout', 'succeeded'), step('step1', 'succeeded'), step('step2', 'succeeded'), step('step3', 'running', { startedAt: now - 20000, finishedAt: undefined })] },
+            'Validate.test.linux_node24': { state: 'pending', reused: false, steps: [] },
+            'Validate.test.windows_node22': { state: 'pending', reused: false, steps: [] },
+            'Build.build': { state: 'pending', reused: false, steps: [] },
+            'Build.release_notes': { state: 'pending', reused: false, steps: [] },
+            'Deploy.deploy_web': { state: 'pending', reused: false, steps: [] },
+          },
+        },
+        done: {
+          runId: 'run-0008',
+          live: false,
+          selection: 'whole pipeline',
+          result: 'failed',
+          buildNumber: '20261011.3',
+          startedAt: now - 400000,
+          finishedAt: now - 152000,
+          gaps: ['Deploy static site / Upload to Azure Static Web Apps: AzureStaticWebApp@0 was replaced by ./ci/local/deploy-stub.sh.'],
+          tests: [{ jobId: 'Validate.test.linux_node22', title: 'Unit tests linux_node22', total: 14, passed: 13, failed: 1, skipped: 0, durationMs: 250, failures: ['src/lib/stats.test.ts > averageDuration > averages finished runs only'] }],
+          coverage: [{ jobId: 'Validate.test.linux_node22', format: 'cobertura', linesCovered: 30, linesTotal: 32, branchesCovered: 16, branchesTotal: 18 }],
+          artifacts: [{ jobId: 'Build.build', name: 'web', files: 3, path: '/store/runs/run-0008/artifacts/web' }],
+          summaries: [{ jobId: 'Build.release_notes', name: 'release-notes.md', path: '/store/runs/run-0008/summaries/release-notes.md' }],
+          jobs: {
+            'Validate.lint': { state: 'succeeded', reused: true, message: 'Not run again: result and outputs reused from run-0007.', steps: [] },
+            'Validate.test.linux_node22': { state: 'failed', reused: false, startedAt: 1000, finishedAt: 75000, message: "Step 'Run unit tests with coverage' failed.", steps: [step('__init', 'succeeded', { displayName: 'Initialize job' }), step('checkout', 'succeeded'), step('step1', 'succeeded'), step('step2', 'succeeded'), step('step3', 'succeeded'), step('step4', 'skipped', { message: "Its condition was false: and(succeeded(), ne(variables['coverage'], 'true'))" }), step('step5', 'failed', { message: "Bash exited with code '1'.", errors: 1 }), step('step6', 'succeeded'), step('step7', 'skipped', { message: 'An earlier step failed and its condition is and(succeeded(), eq(variables[\'coverage\'], \'true\'))' }), step('__post1', 'succeeded', { displayName: 'Post-job: Cache npm' })] },
+            'Validate.test.linux_node24': { state: 'succeeded', reused: false, startedAt: 1000, finishedAt: 64000, steps: [] },
+            'Validate.test.windows_node22': { state: 'succeededWithIssues', reused: false, startedAt: 1000, finishedAt: 158000, steps: [] },
+            'Build.build': { state: 'skipped', reused: false, message: 'Stage skipped: its condition \'succeeded()\' was false.', steps: [] },
+            'Build.release_notes': { state: 'skipped', reused: false, steps: [] },
+            'Deploy.deploy_web': { state: 'succeededWithGaps', reused: false, startedAt: 1000, finishedAt: 9000, steps: [step('download', 'succeeded'), step('step1', 'succeeded'), step('step2', 'succeeded', { warnings: 1 })] },
+          },
+        },
+      };
+
+      // ?problems=errors shows the errors view instead of the graph; ?problems=warnings puts a banner over the graph.
+      const at = (file, line, column = 1) => ({ file, line, column, src: { file: '/ws/' + file, line, column } });
+      const warning = { severity: 'warning', code: 'unknown-key', message: "Unexpected key 'displayname' in a job. Did you mean 'displayName'?", ...at('azure-pipelines.yml', 52, 9) };
+      const sets = {
+        none: [],
+        warnings: [warning, { severity: 'warning', code: 'job-no-steps', message: "Job 'notify' has no steps, so it does nothing.", ...at('azure-pipelines.yml', 98, 9) }],
+        errors: [
+          { severity: 'error', code: 'condition', message: "Invalid condition 'and(succeeded(': Unexpected end of the condition.", ...at('azure-pipelines.yml', 63, 20) },
+          { severity: 'error', code: 'dependency-cycle', message: 'Jobs depend on each other in a loop: build → test → build.', ...at('azure-pipelines.yml', 71, 9) },
+          { severity: 'error', code: 'yaml-duplicate-key', message: "Duplicate key 'script': it is already set on line 14.", ...at('ci/templates/install.yml', 15, 9), includedFrom: { file: 'azure-pipelines.yml', line: 57, src: { file: '/ws/azure-pipelines.yml', line: 57, column: 11 } } },
+          warning,
+        ],
+      };
+
+      // ?graph=wide swaps the demo's straight chain for stages that fan out and back in.
+      function wide(graph) {
+        const template = graph.stages[1].jobs[0];
+        const plan = [
+          ['verify', 'Verify ongoing pipeline runs', [], 'succeeded', 1],
+          ['approval', 'Wait on approval', ['verify'], 'skipped', 1],
+          ['unblock', 'Parallel runs dependency unblock', ['approval'], 'succeeded', 1],
+          ['download', 'Download artifact and export variables', ['unblock'], 'succeeded', 2],
+          ['tag', 'Tag Pipeline Run', ['download'], 'succeeded', 1],
+          ['collect', '[Staging] Collect deployment info', ['download'], 'succeeded', 1],
+          ['cd', '[Staging] CD', ['tag', 'collect'], 'succeeded', 3],
+          ['preview', '[Staging] Preview Gateway CD', ['collect'], 'skipped', 1],
+          ['gateway', '[Staging] Gateway CD', ['collect'], 'succeeded', 2],
+          ['quality', '[Staging] Quality Gate', ['cd', 'preview', 'gateway'], 'running', 2],
+        ];
+        const column = {};
+        for (const [id, , deps] of plan) column[id] = deps.length ? Math.max(...deps.map((d) => column[d])) + 1 : 0;
+        const jobs = {};
+        const stages = plan.map(([id, displayName, dependsOn, state, count]) => ({
+          id, displayName, implicit: false, column: column[id], dependsOn, src: graph.stages[0].src,
+          jobs: Array.from({ length: count }, (_, i) => {
+            const jobId = `${id}.job${i + 1}`;
+            const started = now - 600000 + column[id] * 60000;
+            jobs[jobId] = state === 'skipped' ? { state, reused: false, steps: [] }
+              : state === 'running' ? { state: i === 0 ? 'running' : 'pending', reused: false, startedAt: i === 0 ? now - 30000 : undefined, steps: [] }
+              : { state, reused: false, startedAt: started, finishedAt: started + 5000 + i * 40000 + column[id] * 9000, steps: [] };
+            return { ...template, id: jobId, name: `job${i + 1}`, displayName: `Job ${i + 1}`, dependsOn: [], leg: undefined };
+          }),
+        }));
+        const wideRun = { runId: 'run-0042', live: true, selection: 'whole pipeline', startedAt: now - 600000, gaps: [], tests: [], coverage: [], artifacts: [], summaries: [], jobs };
+        runs.live = wideRun;
+        runs.done = { ...wideRun, live: false, result: 'succeeded', finishedAt: now, jobs: Object.fromEntries(Object.entries(jobs).map(([k, v]) => [k, v.state === 'running' || v.state === 'pending' ? { state: 'succeeded', reused: false, startedAt: now - 30000, finishedAt: now, steps: [] } : v])) };
+        return { ...graph, stages };
+      }
+
+      fetch('graph.json')
+        .then((res) => res.json())
+        .then((graph) => (params.get('graph') === 'wide' ? wide(graph) : graph))
+        .then((graph) => {
+          const script = document.createElement('script');
+          script.src = '../../media/graph.js';
+          script.onload = () =>
+            window.postMessage({ type: 'model', graph, title: 'azure-pipelines.yml', trusted: params.get('trusted') !== 'no', problems: sets[params.get('problems') ?? 'none'], run: runs[params.get('state') ?? 'none'], focus: params.get('focus') ?? undefined }, '*');
+          document.body.append(script);
+        });
+    </script>
+  </body>
+</html>

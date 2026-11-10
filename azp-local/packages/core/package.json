@@ -1,0 +1,12 @@
+{
+  "name": "@azp-local/core",
+  "version": "0.1.0",
+  "description": "Pipeline model, expression language, template expansion, planner, engine contract and run store. No dependency on VS Code.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "yaml": "^2.9.1"
+  }
+}

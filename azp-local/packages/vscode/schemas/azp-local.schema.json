@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://azp-local.invalid/schemas/azp-local.schema.json",
+  "title": ".azp-local.yml",
+  "description": "Local-run settings for the Azure Pipelines Local Runner. Every key is optional.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "pipelines": {
+      "description": "Extra files to treat as pipelines, beyond those detected by content.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "images": {
+      "description": "Pool name or vmImage label -> container image, or \"host\" to run on this machine without isolation.",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "repositories": {
+      "description": "resources.repositories alias -> local folder, for templates and checkouts from other repositories.",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "parameters": {
+      "description": "Values for the pipeline's template parameters.",
+      "type": "object"
+    },
+    "variables": {
+      "description": "Plain variables and predefined-variable overrides, for example Build.Reason: PullRequest.",
+      "type": "object",
+      "additionalProperties": { "type": ["string", "number", "boolean"] }
+    },
+    "variableGroups": {
+      "description": "Local values for variable groups. A secret is declared as { secret: true }; its value is prompted for and kept in the keychain.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "oneOf": [
+            { "type": ["string", "number", "boolean"] },
+            {
+              "type": "object",
+              "required": ["secret"],
+              "additionalProperties": false,
+              "properties": { "secret": { "const": true } }
+            }
+          ]
+        }
+      }
+    },
+    "tasks": {
+      "description": "What to do with tasks that cannot run locally, keyed by Name@Version or Name.",
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "enum": ["skip", "fail"] },
+          {
+            "type": "object",
+            "required": ["script"],
+            "additionalProperties": false,
+            "properties": { "script": { "type": "string", "description": "Script in the repository to run in place of the task. Inputs arrive as INPUT_<NAME>." } }
+          },
+          {
+            "type": "object",
+            "required": ["path"],
+            "additionalProperties": false,
+            "properties": { "path": { "type": "string", "description": "Folder holding the task's task.json; its Node handler is run." } }
+          }
+        ]
+      }
+    },
+    "workspace": {
+      "description": "copy (default): a job gets a copy of tracked and unignored files. mount: bind the working tree for speed; steps then change your files.",
+      "enum": ["copy", "mount"]
+    },
+    "dockerSocket": {
+      "description": "Mount the Docker socket into job containers. Off by default: code with the socket can act as root on the host.",
+      "type": "boolean"
+    }
+  }
+}

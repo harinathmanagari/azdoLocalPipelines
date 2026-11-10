@@ -1,0 +1,26 @@
+# A Go service built in a container job, on top of a template the pipeline extends.
+trigger:
+  branches:
+    include: [main]
+
+parameters:
+  - name: goVersion
+    type: string
+    default: '1.24'
+  - name: lint
+    type: boolean
+    default: false
+
+extends:
+  template: templates/governed.yml
+  parameters:
+    image: golang:${{ parameters.goVersion }}-alpine
+    level: ${{ parameters.goVersion }}
+    buildSteps:
+      - script: go build ./...
+        displayName: Build
+      - script: go test ./... -count=1
+        displayName: Test
+      - ${{ if parameters.lint }}:
+          - script: golangci-lint run
+            displayName: Lint
