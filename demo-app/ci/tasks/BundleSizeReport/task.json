@@ -1,0 +1,37 @@
+{
+  "id": "6f2b1c7e-6d0a-4c1e-9a55-1f0d6c3b7a41",
+  "name": "BundleSizeReport",
+  "friendlyName": "Bundle size report",
+  "description": "Lists the files in a build output folder and fails when the total size exceeds a budget.",
+  "author": "Pipeline Pulse team",
+  "category": "Build",
+  "version": { "Major": 1, "Minor": 0, "Patch": 0 },
+  "instanceNameFormat": "Bundle size report for $(directory)",
+  "inputs": [
+    {
+      "name": "directory",
+      "type": "filePath",
+      "label": "Directory",
+      "required": true,
+      "helpMarkDown": "Folder whose files are measured, relative to the sources directory."
+    },
+    {
+      "name": "budgetKb",
+      "type": "string",
+      "label": "Budget (KB)",
+      "defaultValue": "500",
+      "required": false,
+      "helpMarkDown": "Fail the step when the folder is larger than this many kilobytes."
+    },
+    {
+      "name": "warnAtPercent",
+      "type": "string",
+      "label": "Warn at (% of budget)",
+      "defaultValue": "80",
+      "required": false
+    }
+  ],
+  "execution": {
+    "Node20_1": { "target": "index.js" }
+  }
+}

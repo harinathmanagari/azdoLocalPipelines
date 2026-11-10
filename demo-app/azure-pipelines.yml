@@ -1,0 +1,196 @@
+# CI/CD for the Pipeline Pulse demo frontend.
+#
+#   Validate  lint + typecheck, unit tests on a Node/OS matrix
+#   Build     production bundle, bundle-size check, published as the "web" artifact
+#   Deploy    Azure Static Web Apps (main branch only)
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include: [main]
+  paths:
+    exclude: [README.md]
+
+pr:
+  branches:
+    include: [main]
+
+schedules:
+  - cron: '0 3 * * 1-5'
+    displayName: Nightly build
+    branches:
+      include: [main]
+    always: false
+
+parameters:
+  - name: includeWindows
+    displayName: Run the Windows test leg
+    type: boolean
+    default: true
+  - name: deployEnvironment
+    displayName: Environment to deploy to
+    type: string
+    default: staging
+    values: [staging, production]
+  - name: extraChecks
+    displayName: Extra validation commands
+    type: object
+    default:
+      - name: typecheck
+        command: npm run typecheck
+
+variables:
+  - template: ci/templates/variables.yml
+  - name: bundleBudgetKb
+    value: '300'
+
+stages:
+  - stage: Validate
+    displayName: Validate
+    jobs:
+      - job: lint
+        displayName: Lint and typecheck
+        pool:
+          vmImage: ubuntu-24.04
+        steps:
+          - template: ci/templates/install.yml
+            parameters:
+              nodeVersion: $(defaultNodeVersion)
+          - script: npm run lint
+            displayName: ESLint
+          - ${{ each check in parameters.extraChecks }}:
+              - script: ${{ check.command }}
+                displayName: 'Extra check: ${{ check.name }}'
+
+      - job: test
+        displayName: Unit tests
+        strategy:
+          maxParallel: 2
+          matrix:
+            linux_node22:
+              imageName: ubuntu-24.04
+              nodeVersion: 22.x
+              coverage: 'true'
+            linux_node24:
+              imageName: ubuntu-24.04
+              nodeVersion: 24.x
+              coverage: 'false'
+            ${{ if eq(parameters.includeWindows, true) }}:
+              windows_node22:
+                imageName: windows-2025
+                nodeVersion: 22.x
+                coverage: 'false'
+        pool:
+          vmImage: $(imageName)
+        steps:
+          - template: ci/templates/install.yml
+            parameters:
+              nodeVersion: $(nodeVersion)
+          - script: npm run test:ci
+            displayName: Run unit tests
+            condition: and(succeeded(), ne(variables['coverage'], 'true'))
+          - script: npm run test:coverage
+            displayName: Run unit tests with coverage
+            condition: and(succeeded(), eq(variables['coverage'], 'true'))
+          - task: PublishTestResults@2
+            displayName: Publish test results
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: '**/junit.xml'
+              searchFolder: $(System.DefaultWorkingDirectory)/test-results
+              testRunTitle: Unit tests $(System.JobName)
+          - task: PublishCodeCoverageResults@2
+            displayName: Publish coverage
+            condition: and(succeeded(), eq(variables['coverage'], 'true'))
+            inputs:
+              summaryFileLocation: $(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml
+
+  - stage: Build
+    displayName: Build
+    dependsOn: Validate
+    jobs:
+      - job: build
+        displayName: Production build
+        pool:
+          vmImage: ubuntu-24.04
+        steps:
+          - template: ci/templates/install.yml
+            parameters:
+              nodeVersion: $(defaultNodeVersion)
+          - bash: |
+              set -euo pipefail
+              version="$(node -p "require('./package.json').version")+build.$(Build.BuildId)"
+              echo "App version: $version"
+              echo "##vso[task.setvariable variable=appVersion;isOutput=true]$version"
+            name: meta
+            displayName: Compute version
+          - script: npm run build
+            displayName: Vite build
+            env:
+              VITE_APP_VERSION: $(meta.appVersion)
+          - task: BundleSizeReport@1
+            displayName: Bundle size report
+            inputs:
+              directory: dist/assets
+              budgetKb: $(bundleBudgetKb)
+          - publish: $(System.DefaultWorkingDirectory)/dist
+            artifact: web
+            displayName: Publish web artifact
+
+      - job: release_notes
+        displayName: Release notes
+        dependsOn: build
+        pool:
+          vmImage: ubuntu-24.04
+        variables:
+          appVersion: $[ dependencies.build.outputs['meta.appVersion'] ]
+        steps:
+          - checkout: none
+          - download: current
+            artifact: web
+            displayName: Download web artifact
+          - bash: |
+              set -euo pipefail
+              notes="$(Agent.TempDirectory)/release-notes.md"
+              {
+                echo "## Pipeline Pulse $(appVersion)"
+                echo
+                echo "| File | Bytes |"
+                echo "| --- | ---: |"
+                cd "$(Pipeline.Workspace)/web"
+                find . -type f | sort | while read -r file; do
+                  echo "| ${file#./} | $(wc -c < "$file" | tr -d ' ') |"
+                done
+              } > "$notes"
+              cat "$notes"
+              echo "##vso[task.uploadsummary]$notes"
+            displayName: Write release notes
+
+  - stage: Deploy
+    displayName: Deploy (${{ parameters.deployEnvironment }})
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: deploy_web
+        displayName: Deploy static site
+        environment: pipeline-pulse-${{ parameters.deployEnvironment }}
+        pool:
+          vmImage: ubuntu-24.04
+        variables:
+          - group: demo-release-settings
+          - name: appVersion
+            value: $[ stageDependencies.Build.build.outputs['meta.appVersion'] ]
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying $(appVersion) to ${{ parameters.deployEnvironment }} in $(region)"
+                  displayName: Announce deployment
+                - task: AzureStaticWebApp@0
+                  displayName: Upload to Azure Static Web Apps
+                  inputs:
+                    app_location: $(Pipeline.Workspace)/web
+                    skip_app_build: true
+                    azure_static_web_apps_api_token: $(deployToken)

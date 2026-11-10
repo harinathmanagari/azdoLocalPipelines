@@ -1,0 +1,5 @@
+# Variables shared by every stage.
+variables:
+  defaultNodeVersion: 22.x
+  npm_config_cache: $(Pipeline.Workspace)/.npm
+  CI: 'true'
