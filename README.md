@@ -17,7 +17,6 @@
 
 <img src="docs/assets/demo.gif" alt="The azp-local VS Code extension: the Pipelines view, the graph, Doctor, parameters, a full run in Docker containers with live step status, then the results and the Testing view" width="900" />
 
-<sub>The VS Code extension on the demo pipeline, recorded from a real VS Code window. The five-minute run is sped up about 16 times. A terminal recording is further down.</sub>
 
 </div>
 
