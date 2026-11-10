@@ -15,9 +15,9 @@
 
 <br />
 
-<img src="docs/assets/demo.gif" alt="azp-local running the demo pipeline in Docker containers, job by job, ending in 'succeeded with gaps'" width="900" />
+<img src="docs/assets/demo.gif" alt="The azp-local VS Code extension: the Pipelines view, the graph, Doctor, parameters, a full run in Docker containers with live step status, then the results and the Testing view" width="900" />
 
-<sub>The whole demo pipeline running in containers from the command line. Replayed from the tool's real log; the image build is already cached.</sub>
+<sub>The VS Code extension on the demo pipeline, recorded from a real VS Code window. The five-minute run is sped up about 16 times. A terminal recording is further down.</sub>
 
 </div>
 
@@ -89,39 +89,73 @@ The full walk-through, with what you should see at each step, is in [`SETUP.md`]
 
 ## See it running
 
-Everything below is from a real run of the demo pipeline in Docker containers on Windows 10: six jobs across three stages, 14 of 14 tests passing on two Node versions, 100% line coverage, and one published artifact.
+Everything below is from real runs of the demo pipeline in Docker containers on Windows 10: six jobs across three stages, 14 of 14 tests passing on two Node versions, 100% line coverage, and one published artifact. The VS Code screens were recorded from the extension running in a real VS Code window.
 
-### Check your setup with Doctor
+### In VS Code
 
-Doctor lists every pool, variable group and task that needs a decision, before you run anything.
+**1. Open the Pipelines view.** Every pipeline in the folder is listed with its stages, jobs and the pool or image each job runs on. The Windows job is marked as running on the host.
 
-![azp-local doctor reporting Docker, the agent image, disk, pools, variable groups and tasks](docs/assets/cli-doctor.png)
+<img src="docs/assets/ext-pipelines-view.png" alt="The Pipelines (Local) view in VS Code: azure-pipelines.yml with stages Validate, Build and Deploy (staging), their jobs and agent images, and an empty Runs list" width="900" />
 
-The warnings are expected: they describe decisions the demo's `.azp-local.yml` already makes.
+**2. Run from the YAML.** CodeLens links appear above the first line, and above each stage and job: **Run pipeline**, **Show graph**, **Expand to final YAML**.
 
-### See the pipeline before it runs
+<img src="docs/assets/ext-yaml-codelens.png" alt="azure-pipelines.yml open in the editor with Run pipeline, Show graph and Expand to final YAML links above line 1" width="900" />
 
-`graph` shows stages, jobs and steps with every expression already evaluated. The `[if ... -> skipped]` notes show which steps will not run for each matrix leg, and why.
+**3. Check the setup with Doctor.** The graph panel opens beside the YAML. Its **Doctor** button reports Docker, variable groups and every task that needs a decision. The warnings are expected: they describe choices the demo's `.azp-local.yml` already makes.
 
-![azp-local graph printing the stages, jobs and steps of the demo pipeline, with each step's condition and tier](docs/assets/cli-graph.png)
+<img src="docs/assets/ext-graph-doctor.png" alt="The graph panel next to the YAML, with the Output panel showing Doctor results for variable groups and tasks" width="900" />
 
-### Run it, and read the result
+**4. Set parameters for this run.** The demo's Windows leg runs directly on your machine, so this run switches it off with `includeWindows = false`. The leg disappears from the tree and the graph.
 
-The pipeline graph in VS Code after a full run. Each job shows its result and duration. Open a job to see its steps, then the test, coverage, artifact and summary tiles underneath.
+<img src="docs/assets/ext-parameters.png" alt="The Parameters quick pick showing includeWindows set to false for local runs, with the Windows job gone from the Pipelines view" width="900" />
 
-<img src="docs/assets/graph-job-steps.png" alt="The pipeline graph panel after a run: Validate, Build and Deploy stages, the linux_node22 job expanded to show every step with its duration, then test, coverage and artifact tiles" width="900" />
+**5. Run it.** Jobs run two at a time in containers. The tree shows each step as it starts and finishes, and the graph updates alongside it.
 
-The panel also follows the VS Code theme:
+<img src="docs/assets/ext-running.png" alt="A run in progress: the Pipelines view with the Unit tests linux_node22 job expanded to its steps, and the graph showing the Validate stage running" width="900" />
+
+Click any step to open its log.
+
+<img src="docs/assets/ext-step-log.png" alt="The log of the Install dependencies step open as an editor tab" width="900" />
+
+When a job needs a secret from a variable group, you are asked for it. It is kept in your operating system's keychain, never in the workspace, and you can leave it empty.
+
+<img src="docs/assets/ext-secret-prompt.png" alt="A prompt asking for the secret deployToken of variable group demo-release-settings" width="900" />
+
+**6. Read the result.** The run ends as **succeeded with gaps**. Each job shows its result and duration; open one to see its steps, then the test, coverage, artifact and summary tiles underneath.
+
+<img src="docs/assets/ext-result.png" alt="The finished run: Pipelines view with every step green, and the graph showing succeeded with gaps and a note that the Azure Static Web Apps task was replaced by a script" width="900" />
+
+<img src="docs/assets/graph-job-steps.png" alt="The graph panel after a run: the linux_node22 job expanded to every step with its duration, then test, coverage and artifact tiles" width="900" />
+
+Published test results also appear in VS Code's **Testing** view, linked to the test files.
+
+<img src="docs/assets/ext-testing.png" alt="The Testing view showing 14 of 14 tests passing, grouped by test file and job" width="900" />
+
+The graph panel follows the VS Code theme:
 
 <img src="docs/assets/graph-run-result-dark.png" alt="The same run result in the dark theme" width="900" />
 
-### The summary, in a terminal
+The run ends as **succeeded with gaps** because `AzureStaticWebApp@0` cannot run locally, so the demo's `.azp-local.yml` replaces it with a script that only checks the artifact. The tool never reports that as a plain pass.
+
+> The Windows leg is not in these screens, because it runs on the host without isolation and needs your approval. The Problems view and the **Runs** history are not pictured either. The dark-theme screenshot is the graph panel rendered from the stored data of the same kind of run, not a VS Code window.
+
+### On the command line
+
+The command line does the same work. The recording below is the whole demo pipeline, replayed from the tool's real log with the agent image already built.
+
+<img src="docs/assets/demo-cli.gif" alt="azp-local running the demo pipeline in Docker containers from a terminal, job by job, ending in 'succeeded with gaps'" width="900" />
+
+**Doctor** lists every pool, variable group and task that needs a decision, before you run anything.
+
+![azp-local doctor reporting Docker, the agent image, disk, pools, variable groups and tasks](docs/assets/cli-doctor.png)
+
+**`graph`** shows stages, jobs and steps with every expression already evaluated. The `[if ... -> skipped]` notes show which steps will not run for each matrix leg, and why.
+
+![azp-local graph printing the stages, jobs and steps of the demo pipeline, with each step's condition and tier](docs/assets/cli-graph.png)
+
+**`run`** ends with a summary, and the exit status is `3` when something could not run locally.
 
 ![azp-local run summary: five jobs ok, the deploy job marked gaps, tests 14/14, coverage 100%, result succeeded with gaps, exit 3](docs/assets/cli-run-summary.png)
-
-The run ends as **succeeded with gaps**, and the exit status is `3`. That is intended: `AzureStaticWebApp@0` cannot run locally, so the demo's `.azp-local.yml` replaces it with a script that only checks the artifact. The tool never reports that as a plain pass.
-
-> The graph screenshots are the extension's graph panel rendered from the stored data of that same run. The VS Code tree views, CodeLens and Problems panel are not pictured.
 
 ## How it works
 
@@ -244,7 +278,8 @@ This is the first build, covering phases 1 to 3 of the design: see, run, widen. 
 | Unit and engine tests (`npm test`), run in host mode with no Docker | **Expansion against Azure DevOps.** The recorded expansions in `corpus/expected` come from this expander. The design's oracle is the Preview API, which needs an organisation |
 | Nine integration tests in a real VS Code (`npm run test:extension`) | **How the agent passes inputs to tasks** (`INPUT_<NAME>` variables, `##vso` commands) against a Microsoft task package. It is exercised with the demo's in-house task |
 | The demo pipeline's Linux jobs in real containers: agent image built, six jobs run, 14/14 tests, 100% coverage, artifact published (Windows 10, Rancher Desktop with dockerd) | Runs on macOS and Linux hosts, and on Docker Desktop or Podman |
-| The demo pipeline's Windows leg in host mode, end to end on Windows 10 | The extension used by hand across many repositories. So far it has been driven by its automated tests |
+| The demo pipeline's Windows leg in host mode, end to end on Windows 10 | The extension used across many repositories, and by people. The full demo run in a real VS Code window was driven by scripted clicks, as were the automated tests |
+| The extension in a real VS Code window: tree, graph, Doctor, parameters, a full run with live status, step logs, the secret prompt and the Testing view | |
 
 Known limits:
 

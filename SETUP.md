@@ -11,7 +11,7 @@ Paths are relative to the folder that holds this file. Commands work in PowerShe
 | C. Command line | 13 | Only for Linux jobs |
 | D. Your own repository | 14 | Only for Linux jobs |
 
-> **State of this build.** Building, testing and packaging (steps 2 to 4) have been run as written on Windows 10, apart from the install command itself. The extension has been exercised inside VS Code by its automated tests, not yet by hand. The Windows job of step 9 has run end to end from the command line. Steps 10 and 11 run jobs in real containers. The whole demo pipeline (all six Linux jobs) has been run that way from the command line on Windows 10 with Rancher Desktop (dockerd): the agent image built, 14 of 14 tests passed, and the run ended as *succeeded with gaps*. It has not been done from the extension by hand, nor on macOS, Linux, Docker Desktop or Podman, so expect first-run problems there and see [Troubleshooting](#troubleshooting).
+> **State of this build.** Building, testing and packaging (steps 2 to 4) have been run as written on Windows 10, apart from the install command itself. The extension has been exercised inside VS Code by its automated tests, not yet by hand. The Windows job of step 9 has run end to end from the command line. Steps 10 and 11 run jobs in real containers. The whole demo pipeline (all six Linux jobs) has been run that way from the command line on Windows 10 with Rancher Desktop (dockerd): the agent image built, 14 of 14 tests passed, and the run ended as *succeeded with gaps*. The same pipeline has also been run from the extension in a real VS Code window, with the Windows leg switched off (graph, Doctor, parameters, live step status, step logs, the secret prompt, the Testing view); that was driven by scripted clicks, not by hand. It has not been done on macOS, Linux, Docker Desktop or Podman, so expect first-run problems there and see [Troubleshooting](#troubleshooting).
 
 ---
 
@@ -189,7 +189,7 @@ Docker must be running (step 5).
 
 **You should see**, the first time only, the agent image `azp-local/agent-ubuntu:24.04` being built. That takes several minutes and needs internet access. Then the steps run: **Checkout**, **Use Node 22.x**, **Cache npm**, **Install dependencies**, **ESLint**, **Extra check: typecheck**.
 
-The same job has run in a container from the command line (see the state of this build above), but not yet from the extension by hand. If it fails, the log of **Initialize job** or of the failing step says why; check [Troubleshooting](#troubleshooting).
+The same job has run in a container from the command line and from the extension (see the state of this build above). If it fails, the log of **Initialize job** or of the failing step says why; check [Troubleshooting](#troubleshooting).
 
 ### Step 11. Run the whole pipeline
 
